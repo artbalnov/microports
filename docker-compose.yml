@@ -1,0 +1,60 @@
+version: '3.8'
+volumes:
+  port_mongo_data:
+    external: true
+
+services:
+  api:
+    image: golang:latest
+    env_file:
+    - .env
+    volumes:
+    - .:/go/src/github.com/microports/
+    working_dir: /go/src/github.com/microports/
+    command: go run ./cmd/api/main.go --address=:8080
+    restart: always
+
+  port:
+    image: golang:latest
+    env_file:
+    - .env
+    volumes:
+    - .:/go/src/github.com/microports/
+    working_dir: /go/src/github.com/microports/
+    command: go run ./cmd/port/main.go --address=:51001
+    restart: always
+    depends_on:
+      - mongo
+
+  #
+  # mongo
+  #
+  mongo:
+    image: mongo
+    ports:
+      - 27017
+    logging:
+      driver: none
+    volumes:
+      - port_mongo_data:/data/db
+
+  mongo_express:
+    image: mongo-express
+    ports:
+      - 8195:8081
+    links:
+      - mongo
+    logging:
+      driver: none
+    depends_on:
+      - mongo
+
+  nginx:
+    image: "nginx:latest"
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker-compose.nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: always
+    logging:
+      driver: none
