@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package port;
+
+import "validate/validate.proto";
+
+option go_package = "port";
+
+service PortService {
+    rpc SavePort        (SavePortRequest)       returns (SavePortResponse) {}
+    rpc SavePorts       (SavePortsRequest)  returns (SavePortsResponse) {}
+
+    rpc GetAllPorts    (GetAllPortsRequest)       returns (GetAllPortsResponse) {}
+}
+
+message SavePortRequest {
+    PortEntity Port = 1 [(validate.rules).message.required = true];
+}
+
+message SavePortResponse {}
+
+
+
+message SavePortsRequest {
+    repeated PortEntity Items = 1;
+}
+
+message SavePortsResponse {}
+
+
+
+message GetAllPortsRequest {}
+
+message GetAllPortsResponse {
+    repeated PortEntity Items   = 1;
+}
+
+
+
+// Service entity
+message PortEntity {
+    string ID                    = 1 [(validate.rules).string.min_len = 1];
+    string Name                  = 2 [(validate.rules).string.min_len = 1];
+
+    repeated float Coordinates   = 3;
+
+    string City                  = 4;
+    string Province              = 5;
+    string Country               = 6;
+
+    repeated string  Alias       = 7;
+
+    repeated string  Regions     = 8;
+    string Timezone              = 9;
+    repeated string  Unlocs      = 10;
+
+    string Code                  = 11;
+}
+
+// Service error codes
+enum PortServiceErrorCode {
+    Unknown         = 0;
+    Internal        = 5000;
+    InvalidRequest  = 4000;
+}
